@@ -11,20 +11,19 @@ os.makedirs(IMAGE_FOLDER, exist_ok=True)
 # Inisialisasi CSV jika belum ada
 if not os.path.exists(CSV_FILE):
     df_init = pd.DataFrame(columns=[
-        "Tanggal", "Aktivitas", "Posisi", "Jam Mulai", "Jam Selesai", "Durasi", "Foto"
+        "Tanggal", "Aktivitas", "Posisi", "Jam Mulai", "Jam Selesai", "Durasi (Jam)", "Foto"
     ])
     df_init.to_csv(CSV_FILE, index=False)
 
-# Fungsi menghitung durasi
+# Fungsi menghitung durasi dalam jam desimal
 def hitung_durasi(mulai, selesai):
     mulai_dt = datetime.strptime(mulai, "%H:%M")
     selesai_dt = datetime.strptime(selesai, "%H:%M")
     if selesai_dt < mulai_dt:
-        selesai_dt += pd.Timedelta(days=1)  # untuk kegiatan yang melewati tengah malam
+        selesai_dt += pd.Timedelta(days=1)  # untuk aktivitas yang melewati tengah malam
     durasi = selesai_dt - mulai_dt
-    jam, sisa = divmod(durasi.seconds, 3600)
-    menit = sisa // 60
-    return f"{jam:02d}:{menit:02d}"
+    durasi_jam = durasi.total_seconds() / 3600
+    return round(durasi_jam, 2)
 
 # Fungsi simpan data
 def simpan_data(tanggal, aktivitas, posisi, jam_mulai, jam_selesai, durasi, foto_filename):
@@ -34,7 +33,7 @@ def simpan_data(tanggal, aktivitas, posisi, jam_mulai, jam_selesai, durasi, foto
         "Posisi": [posisi],
         "Jam Mulai": [jam_mulai],
         "Jam Selesai": [jam_selesai],
-        "Durasi": [durasi],
+        "Durasi (Jam)": [durasi],
         "Foto": [foto_filename]
     })
     data_baru.to_csv(CSV_FILE, mode="a", header=False, index=False)
